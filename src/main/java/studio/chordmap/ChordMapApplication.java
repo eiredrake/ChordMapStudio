@@ -57,6 +57,8 @@ public final class ChordMapApplication {
                     : path.endsWith(".svg") ? "image/svg+xml"
                     : "text/html; charset=utf-8";
             exchange.getResponseHeaders().set("Content-Type", contentType);
+            // Revalidate the page and scripts together after an application update.
+            exchange.getResponseHeaders().set("Cache-Control", "no-cache");
             exchange.sendResponseHeaders(200, "HEAD".equals(exchange.getRequestMethod()) ? -1 : body.length);
             if (!"HEAD".equals(exchange.getRequestMethod())) exchange.getResponseBody().write(body);
             exchange.close();

@@ -64,6 +64,14 @@ h2 i { color:var(--orange); font-size:26px; font-weight:400; }
 .dot-demo { background:var(--orange); color:white; }.open-demo { border:1px solid var(--ink); font-size:21px; font-weight:400; }.mute-demo { font-size:22px; font-weight:400; }
 .error { border-left:3px solid var(--orange); padding:12px 15px; color:#7f2d14; background:#f2d9cc; }
 footer { background:var(--ink); color:#aaa096; min-height:92px; padding:0 max(22px,calc((100vw - 1180px)/2)); display:flex; align-items:center; justify-content:space-between; font-size:9px; letter-spacing:.14em; }
+.playback-controls { display:flex; flex-wrap:wrap; gap:16px; align-items:end; margin-bottom:24px; }
+.playback-controls label { display:block; margin-bottom:8px; }
+.playback-controls select,.playback-controls input { height:40px; border:1px solid var(--line); background:#f8f5ee; padding:8px; color:var(--ink); font:14px Arial,sans-serif; }
+.playback-controls select { max-width:100%; }
+.playback-controls input { width:90px; }
+.playback-controls p { flex-basis:100%; margin:0; color:var(--muted); font-size:12px; }
+.chord-card.is-playing { outline:3px solid var(--orange); outline-offset:2px; }
+button:disabled { opacity:.45; cursor:default; }
 @media (max-width:800px) {
   .topbar p { display:none; }.intro { grid-template-columns:1fr; padding:48px 0 34px; }.eyebrow { grid-column:auto; }.lede { margin-top:26px; }
   .finder { grid-template-columns:1fr; gap:22px; padding:22px; }.quick-picks { padding:0; flex-wrap:wrap; }.quick-picks>span { width:100%; }

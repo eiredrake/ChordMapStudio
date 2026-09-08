@@ -7,7 +7,8 @@
   <meta name="description" content="Generate, hear, and export clear guitar chord maps for standard tuning.">
   <title>Chord Map Studio</title>
   <link rel="stylesheet" href="/styles.css">
-  <script src="/app.js" defer></script>
+  <script src="/playback.js?v=sampled-audio-2" defer></script>
+  <script src="/app.js?v=sampled-audio-2" defer></script>
 </head>
 <body>
   <div class="grain" aria-hidden="true"></div>
@@ -49,6 +50,33 @@
         <button id="clear-button" type="button" class="icon-button">CLEAR ALL</button>
       </div>
       <p id="error" class="error" role="alert" hidden></p>
+      <div class="playback-controls" aria-label="Composition playback">
+        <div><label for="instrument">SOUND</label><select id="instrument">
+          <optgroup label="Guitars">
+            <option value="acoustic_guitar_steel">Acoustic guitar · steel</option>
+            <option value="acoustic_guitar_nylon">Acoustic guitar · nylon</option>
+            <option value="electric_guitar_clean">Electric guitar · clean</option>
+            <option value="electric_guitar_jazz">Electric guitar · jazz</option>
+            <option value="electric_guitar_muted">Electric guitar · muted</option>
+            <option value="overdriven_guitar">Overdriven guitar</option>
+            <option value="distortion_guitar">Distortion guitar</option>
+          </optgroup>
+          <optgroup label="Basses">
+            <option value="acoustic_bass">Acoustic bass</option>
+            <option value="electric_bass_finger">Electric bass · finger</option>
+            <option value="electric_bass_pick">Electric bass · pick</option>
+            <option value="fretless_bass">Fretless bass</option>
+            <option value="slap_bass_1">Slap bass 1</option>
+            <option value="slap_bass_2">Slap bass 2</option>
+            <option value="synth_bass_1">Synth bass 1</option>
+            <option value="synth_bass_2">Synth bass 2</option>
+          </optgroup>
+        </select></div>
+        <div><label for="tempo">TEMPO · BPM</label><input id="tempo" type="number" min="40" max="240" value="100" step="1"></div>
+        <button id="play-composition" class="icon-button" type="button" disabled>▶ PLAY ALL</button>
+        <button id="stop-playback" class="icon-button" type="button" disabled>■ STOP</button>
+        <p id="playback-status" role="status">Four beats per chord · plays in card order.</p>
+      </div>
       <div id="chord-board" class="chord-board"></div>
     </section>
   </main>
