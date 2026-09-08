@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#17120e">
+  <meta name="description" content="Generate, hear, and export clear guitar chord maps for standard tuning.">
+  <title>Chord Map Studio</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Chord Map Studio home">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M7 4v24M13 4v24M19 4v24M25 4v24M5 9h22M5 17h22M5 25h22"/></svg>
+      <span>CHORD MAP</span><em>STUDIO</em>
+    </a>
+    <p>STANDARD TUNING <strong>E · A · D · G · B · E</strong></p>
+  </header>
+
+  <main>
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">FIND YOUR SHAPE</p>
+      <h1 id="page-title">Name a chord.<br><i>See the fretboard.</i></h1>
+      <p class="lede">From campfire classics to colorful extensions—type a symbol and get a clean, playable chord map in an instant.</p>
+    </section>
+
+    <section class="finder" aria-label="Chord finder">
+      <form id="chord-form">
+        <label for="chord-input">CHORD SYMBOL</label>
+        <div class="input-row">
+          <input id="chord-input" name="symbol" value="C" autocomplete="off" spellcheck="false" maxlength="16" aria-describedby="input-hint">
+          <button class="generate" type="submit">ADD CHORD <span>＋</span></button>
+        </div>
+        <p id="input-hint">Try C, F#m7, Bbmaj7, D/F#, or Asus4</p>
+      </form>
+      <div class="quick-picks" aria-label="Quick picks">
+        <span>QUICK PICKS</span>
+        <button type="button" data-chord="C">C</button><button type="button" data-chord="Am">Am</button>
+        <button type="button" data-chord="G7">G7</button><button type="button" data-chord="Fmaj7">Fmaj7</button>
+        <button type="button" data-chord="C#5">C#5</button>
+      </div>
+    </section>
+
+    <section class="board-section" aria-live="polite">
+      <div class="board-heading">
+        <div><span class="section-label">YOUR CHORD BOARD</span><h2>Chord collection <small id="chord-count">1 chord</small></h2></div>
+        <button id="clear-button" type="button" class="icon-button">CLEAR ALL</button>
+      </div>
+      <p id="error" class="error" role="alert" hidden></p>
+      <div id="chord-board" class="chord-board"></div>
+    </section>
+  </main>
+  <footer><span>BUILT FOR PLAYERS, NOT PRINTER MANUALS.</span><span>CHORD MAP STUDIO · 2026</span></footer>
+</body>
+</html>

@@ -1,0 +1,9 @@
+.git
+.gitignore
+.vscode
+build
+outputs
+*.zip
+README.md
+build.ps1
+run.ps1

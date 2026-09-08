@@ -1,0 +1,2 @@
+G:\codebase\ChordMapStudio\src\main\java\studio\chordmap\ChordEngine.java
+G:\codebase\ChordMapStudio\src\main\java\studio\chordmap\ChordMapApplication.java
