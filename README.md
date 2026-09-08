@@ -20,22 +20,8 @@ The server uses only the Java standard library. No Maven, database, account, or 
 
 ## Docker Compose
 
-The included Compose configuration connects the app to an existing external Docker network named `proxy-tier`. Create that network once if it does not already exist:
-
-```powershell
-docker network create proxy-tier
-```
-
 Start or rebuild the application:
 
 ```powershell
 docker compose up -d --build
 ```
-
-In Nginx Proxy Manager, create a Proxy Host using:
-
-- Forward hostname: `chord-map-studio`
-- Forward port: `8080` (or the `CHORD_MAP_PORT` value from `.env`)
-- Scheme: `http`
-
-The application port is intentionally not published to the Docker host. Nginx Proxy Manager reaches it through `proxy-tier`, and Cloudflare can continue pointing at Nginx Proxy Manager as usual.
