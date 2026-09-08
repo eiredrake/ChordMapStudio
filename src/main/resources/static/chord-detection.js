@@ -57,6 +57,13 @@
     const inside=expected.reduce((sum,pc)=>sum+estimate.chroma[pc],0);
     return inside/estimate.total >= .88 && expected.every(pc=>estimate.chroma[pc]>=estimate.strongest*.08);
   }
+  function feedback(estimate, expected) {
+    if(!estimate || estimate.fit<.72 || estimate.strongest<1e-6)
+      return 'I hear audio, but the notes are not clear yet. Try a clean strum.';
+    const missing=expected.filter(pc=>estimate.chroma[pc]<estimate.strongest*.08);
+    if(missing.length)return 'Not hearing '+missing.map(pc=>names[pc]).join(' / ')+' clearly yet. Try another strum.';
+    return 'Hearing other tones too. Try again with a clean sound.';
+  }
   // An uninterrupted hold is required, with a gap cap so a stalled tab cannot pass.
   class MatchHold {
     reset() { this.since=null; this.last=null; }
@@ -68,6 +75,6 @@
       return now-this.since>=450;
     }
   }
-  globalThis.ChordDetection={createDetector,matches,pitches,supported,MatchHold};
+  globalThis.ChordDetection={createDetector,matches,feedback,pitches,supported,MatchHold,noteName:pc=>names[pc]};
 })();
 

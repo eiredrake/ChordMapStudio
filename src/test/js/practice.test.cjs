@@ -43,6 +43,9 @@ for(const rate of [44100,48000]) {
   assert.equal(D.matches(detect(spectrum([],rate,{noise:.1})),[0,4,7]),false,'Noise cannot pass');
 }
 const hold=new D.MatchHold();
+const singleE={fit:.95,strongest:1,total:1,chroma:[0,0,0,0,1,0,0,0,0,0,0,0]};
+assert.match(D.feedback(singleE,[4,8,11]),/G# \/ B/,'Explain why a single E is not E major');
+assert.match(D.feedback(null,[4,8,11]),/not clear/);
 for(const now of [0,80,160,240,320,400])assert.equal(hold.update(true,now),false);
 assert.equal(hold.update(true,480),true);
 hold.reset();hold.update(true,0);assert.equal(hold.update(true,1000),false,'Stalled tab cannot pass');

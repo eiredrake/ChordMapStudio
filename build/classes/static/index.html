@@ -9,8 +9,8 @@
   <link rel="stylesheet" href="/styles.css?v=reorder-1">
   <script src="/playback.js?v=practice-1" defer></script>
   <script src="/app.js?v=reorder-1" defer></script>
-  <script src="/chord-detection.js?v=practice-1" defer></script>
-  <script src="/practice.js?v=practice-1" defer></script>
+  <script src="/chord-detection.js?v=practice-feedback-2" defer></script>
+  <script src="/practice.js?v=practice-feedback-2" defer></script>
   <script src="/reorder.js?v=reorder-1" defer></script>
 </head>
 <body>
@@ -112,6 +112,7 @@
       <div class="practice-buttons"><button id="practice-start" class="icon-button" type="button" disabled>START DECK</button><button id="practice-end" class="icon-button" type="button" disabled>END SESSION</button></div>
       <div id="practice-stage" class="practice-stage" hidden>
         <p id="practice-progress"></p><h3 id="practice-chord"></h3>
+        <p id="practice-target-tones"></p>
         <div id="practice-diagram"></div>
         <progress id="practice-time" max="10" value="10" aria-label="Time remaining"></progress><p id="practice-countdown" aria-hidden="true"></p>
         <div id="practice-result" role="status" aria-live="polite"></div>

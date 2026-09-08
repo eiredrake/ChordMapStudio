@@ -6,6 +6,7 @@
   let quietSince=null, armed=false, noise=.002, calibratingUntil=0, quietSamples=[];
   const hold=new D.MatchHold();
   const status=text=>{el('listen-status').textContent=text;};
+  const result=text=>{if(el('practice-result').textContent!==text)el('practice-result').textContent=text;};
   const rocksmith=device=>/rocksmith|real\s*tone/i.test(device.label);
   function ready() { return !!stream && stream.getAudioTracks().some(t=>t.readyState==='live' && !t.muted) && ctx?.state==='running'; }
   function buttons() {
@@ -115,6 +116,7 @@
     el('practice-stage').hidden=false;
     el('practice-progress').textContent='Card '+(index+1)+' of '+deck.length;
     el('practice-chord').textContent=card.data.symbol;
+    el('practice-target-tones').textContent='Listening for '+D.pitches(card).map(D.noteName).join(' / ')+'. Play the whole chord.';
     el('practice-diagram').innerHTML=buildSvg(card.data,card.data.voicings[card.voicing]);
     el('practice-diagram').hidden=!el('practice-hint').checked;
     el('practice-time').max=seconds;el('practice-time').value=seconds;
@@ -125,9 +127,9 @@
   function finishCard(success) {
     if(!round)return;
     attempts.add(index);if(success)successes.add(index);
-    const heard=round.heard;round=null;
+    const heard=round.heard,wasArmed=armed;round=null;
     el('practice-result').className=success?'practice-success':'';
-    el('practice-result').textContent=success?'\u2713  Chord matched!':heard?'Not quite this time. Try again whenever you like.':'I could not hear a clear attempt. Check the input level and try again.';
+    result(success?'\u2713  Chord matched!':heard&&!wasArmed?'I heard audio, but need a quiet gap first. Mute the strings, then retry.':heard?'Not quite this time. Try again whenever you like.':'I could not hear a clear attempt. Check the input level and try again.');
     el('practice-countdown').textContent=success?'Nice work.':'Time for another try?';
     el('practice-retry').disabled=false;el('practice-next').disabled=false;
     if(success)transition=setTimeout(nextCard,1600);
@@ -145,7 +147,7 @@
       } else {
         if(quietSamples.length) {
           quietSamples.sort((a,b)=>a-b);noise=Math.max(.0004,Math.min(.015,quietSamples[Math.floor(quietSamples.length*.2)]));quietSamples=[];
-          status('Listening. Strum a chord to check the input. Stop listening releases the microphone.');
+          status('Listening. Start a deck to score your chords. The input preview alone does not grade collection cards.');
           buttons();
         }
         const audible=rms>Math.max(.002,noise*3);
@@ -155,9 +157,15 @@
           const remaining=Math.max(0,(round.deadline-now)/1000);
           el('practice-time').value=remaining;el('practice-countdown').textContent=remaining.toFixed(1)+' seconds left';
           if(!audible) {quietSince??=now;if(now-quietSince>=250)armed=true;} else quietSince=null;
-          if(armed && audible) {round.heard=true;el('practice-result').textContent='Listening...';}
+          if(audible)round.heard=true;
+          const match=armed && !!estimate && D.matches(estimate,D.pitches(deck[index]));
+          if(!armed)result('Waiting for a quiet gap. Mute the strings briefly, then strum.');
+          else if(clipped)result('Input is too loud. Lower the amp or input level and try again.');
+          else if(!audible)result('Ready for your strum. Play the whole '+deck[index].data.symbol+' chord.');
+          else if(match)result('Chord tones match! Let it ring briefly to confirm...');
+          else result(D.feedback(estimate,D.pitches(deck[index])));
           if(now>=round.deadline)finishCard(false);
-          else if(hold.update(armed && !!estimate && D.matches(estimate,D.pitches(deck[index])),now))finishCard(true);
+          else if(hold.update(match,now))finishCard(true);
         }
       }
     } catch {releaseInput();status('Listening was interrupted. Enable listening to try again.');return;}

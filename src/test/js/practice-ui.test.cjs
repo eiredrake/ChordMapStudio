@@ -28,7 +28,7 @@ class AudioContext extends Element {
 const card={id:1,voicing:0,data:{symbol:'C',voicings:[{frets:[-1,3,2,0,1,0]}]}};
 const context=vm.createContext({document,navigator:{mediaDevices:media},window:Object.assign(new Element(),{AudioContext}),performance:{now:()=>now},console,structuredClone,state:{chords:[card,{...card,id:2}]},buildSvg:()=>'<svg></svg>',stopPlayback(){},setTimeout(fn,ms){const id=++seq;timers.set(id,{at:now+ms,fn});return id;},clearTimeout:id=>timers.delete(id)});
 vm.runInContext(fs.readFileSync(path.join(root,'chord-detection.js'),'utf8'),context);
-context.ChordDetection.createDetector=()=>()=>({});context.ChordDetection.matches=()=>match;
+context.ChordDetection.createDetector=()=>()=>({fit:.95,strongest:1,total:1,chroma:[0,0,0,0,1,0,0,0,0,0,0,0],notes:['E']});context.ChordDetection.matches=()=>match;
 el('practice-source').value='mic';el('practice-seconds').value='2';
 vm.runInContext(fs.readFileSync(path.join(root,'practice.js'),'utf8'),context);
 async function flush(){for(let i=0;i<5;i++)await Promise.resolve();}
@@ -39,12 +39,19 @@ function advance(ms){const end=now+ms;while(true){const next=[...timers].filter(
   assert.equal(captureCalls[0].audio.deviceId.exact,'mic1');
   assert.equal(captureCalls[0].audio.echoCancellation,false);
   assert.equal(el('practice-start').disabled,false);
-  await el('practice-start').fire('click');advance(400);audible=true;match=true;advance(560);
+  await el('practice-start').fire('click');advance(400);
+  assert.match(el('practice-target-tones').textContent,/C \/ E \/ G/);
+  assert.match(el('practice-result').textContent,/Ready for your strum/);
+  audible=true;match=true;advance(160);
+  assert.match(el('practice-result').textContent,/Let it ring/);
+  advance(400);
   assert.match(el('practice-result').textContent,/Chord matched/);
   advance(1600);assert.equal(el('practice-progress').textContent,'Card 2 of 2');
   // A ringing previous chord cannot win the next card until strings are muted.
-  advance(600);assert.doesNotMatch(el('practice-result').textContent,/Chord matched/);
-  audible=false;advance(400);audible=true;match=false;advance(1100);
+  advance(600);assert.match(el('practice-result').textContent,/Waiting for a quiet gap/);
+  audible=false;advance(400);audible=true;match=false;advance(160);
+  assert.match(el('practice-result').textContent,/Not hearing C \/ G clearly/);
+  advance(940);
   assert.match(el('practice-result').textContent,/Not quite/);
   await el('practice-retry').fire('click');
   context.pausePracticeForPlayback();advance(3000);assert.match(el('practice-result').textContent,/Paused for playback/);
