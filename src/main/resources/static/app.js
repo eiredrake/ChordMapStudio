@@ -10,6 +10,8 @@ async function addChord(symbol){
 }
 
 function renderBoard(){
+  globalThis.cancelChordDrag?.();
+  globalThis.refreshPracticeDeck?.();
   stopPlayback('Four beats per chord · plays in card order.');
   $('#play-composition').disabled=state.chords.length===0;
   const board=$('#chord-board');$('#chord-count').textContent=`${state.chords.length} ${state.chords.length===1?'chord':'chords'}`;$('#clear-button').disabled=state.chords.length===0;
@@ -18,7 +20,7 @@ function renderBoard(){
 
 function buildCard(card){
   const chord=card.data,voicing=chord.voicings[card.voicing],name=chord.name.split(' ').slice(1).join(' ');
-  return `<article class="chord-card" data-card="${card.id}"><header><div><span class="section-label">CHORD</span><h3>${escapeXml(chord.symbol)}<i>${escapeXml(name)}</i></h3></div><button class="remove-card" type="button" data-remove="${card.id}" aria-label="Remove ${escapeXml(chord.symbol)}">×</button></header><div class="card-diagram">${buildSvg(chord,voicing)}</div><div class="card-meta"><div class="card-meta-row"><span class="card-tones">${chord.tones.map(escapeXml).join(' · ')}</span><div class="card-actions"><button type="button" class="icon-button" data-play="${card.id}" aria-label="Play ${escapeXml(chord.symbol)}">▶</button><button type="button" class="icon-button" data-download="${card.id}" aria-label="Download ${escapeXml(chord.symbol)}">↓</button></div></div><div class="card-voicings voicings" aria-label="Voicings for ${escapeXml(chord.symbol)}">${chord.voicings.map((_,i)=>`<button type="button" class="${i===card.voicing?'active':''}" data-voice="${card.id}:${i}" aria-label="Voicing ${i+1}">${i+1}</button>`).join('')}</div></div></article>`;
+  return `<article class="chord-card" data-card="${card.id}"><header><div><span class="section-label">CHORD</span><h3>${escapeXml(chord.symbol)}<i>${escapeXml(name)}</i></h3></div><div class="card-header-actions"><button type="button" class="reorder-card" data-reorder="${card.id}" aria-label="Move ${escapeXml(chord.symbol)}" aria-describedby="reorder-help" title="Drag to move; arrow keys also move this card">&#x283F;</button><button class="remove-card" type="button" data-remove="${card.id}" aria-label="Remove ${escapeXml(chord.symbol)}">×</button></div></header><div class="card-diagram">${buildSvg(chord,voicing)}</div><div class="card-meta"><div class="card-meta-row"><span class="card-tones">${chord.tones.map(escapeXml).join(' · ')}</span><div class="card-actions"><button type="button" class="icon-button" data-play="${card.id}" aria-label="Play ${escapeXml(chord.symbol)}">▶</button><button type="button" class="icon-button" data-download="${card.id}" aria-label="Download ${escapeXml(chord.symbol)}">↓</button></div></div><div class="card-voicings voicings" aria-label="Voicings for ${escapeXml(chord.symbol)}">${chord.voicings.map((_,i)=>`<button type="button" class="${i===card.voicing?'active':''}" data-voice="${card.id}:${i}" aria-label="Voicing ${i+1}">${i+1}</button>`).join('')}</div></div></article>`;
 }
 
 function buildSvg(chord,voicing){

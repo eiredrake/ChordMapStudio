@@ -6,9 +6,12 @@
   <meta name="theme-color" content="#17120e">
   <meta name="description" content="Generate, hear, and export clear guitar chord maps for standard tuning.">
   <title>Chord Map Studio</title>
-  <link rel="stylesheet" href="/styles.css">
-  <script src="/playback.js?v=sampled-audio-2" defer></script>
-  <script src="/app.js?v=sampled-audio-2" defer></script>
+  <link rel="stylesheet" href="/styles.css?v=reorder-1">
+  <script src="/playback.js?v=practice-1" defer></script>
+  <script src="/app.js?v=reorder-1" defer></script>
+  <script src="/chord-detection.js?v=practice-1" defer></script>
+  <script src="/practice.js?v=practice-1" defer></script>
+  <script src="/reorder.js?v=reorder-1" defer></script>
 </head>
 <body>
   <div class="grain" aria-hidden="true"></div>
@@ -77,7 +80,43 @@
         <button id="stop-playback" class="icon-button" type="button" disabled>■ STOP</button>
         <p id="playback-status" role="status">Four beats per chord · plays in card order.</p>
       </div>
+      <p id="reorder-help" class="reorder-help">Drag a card by its grip to change the order. With the grip focused, use arrow keys to move it.</p>
+      <p id="reorder-status" class="sr-only" role="status"></p>
       <div id="chord-board" class="chord-board"></div>
+    </section>
+    <section class="practice-section" aria-labelledby="practice-title">
+      <span class="section-label">A LITTLE EVERY DAY</span>
+      <h2 id="practice-title">Chord practice</h2>
+      <p>Build a deck from your chord board, then play each card before the timer runs out.</p>
+      <p class="practice-note">Listening preview: major, minor and power chords in standard tuning, A = 440 Hz. Checks the chord sound, not individual fingers or strings. Use a clean guitar signal.</p>
+      <div class="practice-setup">
+        <fieldset><legend>1. Choose your deck</legend>
+          <div id="practice-deck" class="practice-deck"></div>
+          <label class="check-label"><input id="practice-shuffle" type="checkbox" checked> Shuffle cards</label>
+          <label for="practice-seconds">Seconds per card</label>
+          <input id="practice-seconds" type="number" min="2" max="60" step="1" value="10">
+          <label class="check-label"><input id="practice-hint" type="checkbox" checked> Show chord diagram</label>
+        </fieldset>
+        <fieldset><legend>2. Set up listening</legend>
+          <label for="practice-source">Input type</label>
+          <select id="practice-source"><option value="mic">Microphone / other audio input</option><option value="usb">Rocksmith USB cable</option></select>
+          <label for="practice-device">Audio input</label>
+          <select id="practice-device"><option value="">Enable listening to choose a device</option></select>
+          <p id="practice-usb" class="practice-note">Cable status is available after audio permission.</p>
+          <div class="practice-buttons"><button id="listen-enable" class="icon-button" type="button">ENABLE LISTENING</button><button id="listen-disable" class="icon-button" type="button" disabled>STOP LISTENING</button><button id="listen-refresh" class="icon-button" type="button">REFRESH INPUTS</button></div>
+          <label for="practice-level">Input level</label><meter id="practice-level" min="0" max="1" value="0">Input level</meter>
+          <p id="listen-status" role="status">Audio stays in your browser. Nothing is recorded or uploaded.</p>
+          <p id="practice-heard" class="practice-note">Enable listening, then strum to check the input.</p>
+        </fieldset>
+      </div>
+      <div class="practice-buttons"><button id="practice-start" class="icon-button" type="button" disabled>START DECK</button><button id="practice-end" class="icon-button" type="button" disabled>END SESSION</button></div>
+      <div id="practice-stage" class="practice-stage" hidden>
+        <p id="practice-progress"></p><h3 id="practice-chord"></h3>
+        <div id="practice-diagram"></div>
+        <progress id="practice-time" max="10" value="10" aria-label="Time remaining"></progress><p id="practice-countdown" aria-hidden="true"></p>
+        <div id="practice-result" role="status" aria-live="polite"></div>
+        <div class="practice-buttons"><button id="practice-retry" class="icon-button" type="button" disabled>RETRY CARD</button><button id="practice-next" class="icon-button" type="button" disabled>NEXT CARD</button></div>
+      </div>
     </section>
   </main>
   <footer><span>BUILT FOR PLAYERS, NOT PRINTER MANUALS.</span><span>CHORD MAP STUDIO · 2026</span></footer>

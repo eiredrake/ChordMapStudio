@@ -44,6 +44,7 @@ function chordNotes(frets){
 }
 
 async function playCards(cards){
+  globalThis.pausePracticeForPlayback?.();
   stopPlayback('');
   if(!cards.length){audioStatus('Add a chord to start playback.');return;}
   const run=playbackRun;
