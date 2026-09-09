@@ -8,10 +8,10 @@
   <title>Chord Map Studio</title>
   <link rel="stylesheet" href="/styles.css?v=tuner-auto-2">
   <script src="/playback.js?v=practice-1" defer></script>
-  <script src="/app.js?v=string-notes-1" defer></script>
+  <script src="/app.js?v=saved-board-1" defer></script>
   <script src="/chord-detection.js?v=confirmation-2" defer></script>
   <script src="/tuner.js?v=tuner-auto-2" defer></script>
-  <script src="/practice.js?v=tuner-auto-2" defer></script>
+  <script src="/practice.js?v=retry-limit-1" defer></script>
   <script src="/reorder.js?v=reorder-1" defer></script>
 </head>
 <body>
@@ -96,6 +96,10 @@
           <div id="practice-deck" class="practice-deck"></div>
           <label class="check-label"><input id="practice-shuffle" type="checkbox" checked> Shuffle cards</label>
           <label class="check-label"><input id="practice-auto-next" type="checkbox"> Auto next card</label>
+          <label class="check-label"><input id="practice-auto-retry" type="checkbox"> Retry chord after timeout</label>
+          <label for="practice-retry-limit">Extra attempts (0 = Infinite)</label>
+          <input id="practice-retry-limit" type="number" min="0" max="10" step="1" value="3" disabled aria-describedby="practice-retry-help">
+          <p id="practice-retry-help" class="practice-note">3 retries. After the limit, Auto next card decides whether to advance or wait. Zero retries indefinitely until matched.</p>
           <p class="practice-note">Advance after a timeout. Successful matches always advance automatically.</p>
           <label class="check-label"><input id="practice-repeat" type="checkbox"> Repeat deck</label>
           <p class="practice-note">Loop back to the first card. Enable Auto next card too for uninterrupted timed practice.</p>
@@ -128,6 +132,7 @@
         <p id="practice-progress"></p><h3 id="practice-chord"></h3>
         <p id="practice-target-tones"></p>
         <div id="practice-diagram"></div>
+        <p id="practice-attempt" class="practice-note"></p>
         <progress id="practice-time" max="10" value="10" aria-label="Time remaining"></progress><p id="practice-countdown" aria-hidden="true"></p>
         <div id="practice-result" role="status" aria-live="polite"></div>
         <div class="heard-panel"><strong>Live input</strong><p id="practice-live-input"></p><p id="practice-live-notes"></p><p id="practice-live-detail"></p></div>

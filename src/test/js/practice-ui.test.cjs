@@ -125,6 +125,34 @@ function advance(ms){const end=now+ms;while(true){const next=[...timers].filter(
   await document.fire('keydown',space);assert.equal(el('practice-countin-text').textContent,'READY!');
   await el('practice-end').fire('click');advance(5000);
   assert.equal(el('practice-end').disabled,true,'Ending cancels countdown callbacks');
+  // Automatic retries take priority over auto-next and reset for each card.
+  el('practice-countin-seconds').value='0';el('practice-repeat').checked=false;
+  el('practice-auto-retry').checked=true;el('practice-retry-limit').value='2';
+  await el('practice-auto-retry').fire('change');assert.equal(el('practice-retry-limit').disabled,false);
+  audible=false;match=false;await el('practice-start').fire('click');advance(3700);
+  assert.match(el('practice-attempt').textContent,/Retry 1 of 2/);
+  advance(3600);assert.match(el('practice-attempt').textContent,/Retry 2 of 2/);
+  advance(3600);assert.equal(el('practice-progress').textContent,'Card 2 of 2');
+  assert.match(el('practice-attempt').textContent,/First attempt/);
+  await el('practice-end').fire('click');
+  el('practice-retry-limit').value='0';await el('practice-retry-limit').fire('change');
+  assert.match(el('practice-retry-help').textContent,/Infinite/);
+  await el('practice-start').fire('click');advance(44000);
+  assert.equal(el('practice-progress').textContent,'Card 1 of 2','Infinite stays on the chord beyond ten retries');
+  assert.match(el('practice-attempt').textContent,/Retry 12 of Infinite/);
+  audible=true;match=true;advance(720);assert.match(el('practice-result').textContent,/Chord matched/);
+  advance(1600);assert.equal(el('practice-progress').textContent,'Card 2 of 2','Success ends infinite retry');
+  audible=false;match=false;advance(2200);await el('practice-close').fire('click');advance(4000);
+  assert.equal(el('practice-countdown').textContent,'Paused','Closing cancels a scheduled retry');
+  await el('practice-end').fire('click');
+  el('practice-auto-next').checked=false;el('practice-retry-limit').value='1';
+  await el('practice-start').fire('click');advance(7600);
+  assert.equal(el('practice-progress').textContent,'Card 1 of 2','Finite limit waits with auto-next off');
+  assert.match(el('practice-attempt').textContent,/Retry 1 of 1/);
+  assert.match(el('practice-result').textContent,/could not hear/);
+  await el('practice-end').fire('click');
+  el('practice-retry-limit').value='99';await el('practice-retry-limit').fire('change');assert.equal(el('practice-retry-limit').value,'10');
+  el('practice-auto-retry').checked=false;await el('practice-auto-retry').fire('change');assert.equal(el('practice-retry-limit').disabled,true);
   // Tuner shares capture, pauses practice, and keeps capture when dismissed.
   await el('tuner-open').fire('click');await flush();
   assert.equal(el('tuner-modal').open,true);assert.equal(el('practice-modal').open,false);

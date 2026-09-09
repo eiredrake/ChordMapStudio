@@ -57,6 +57,14 @@
   let quietSince=null, armed=false, noise=.002, calibratingUntil=0, quietSamples=[];
   const hold=new D.MatchHold();
   let countInTimer, countInRun=0, pendingStart=false, cycle=1;
+  let retriesUsed=0;
+  function retrySettings() {
+    const input=el('practice-retry-limit'),value=Number(input.value);
+    const limit=input.value.trim()==='' || !Number.isFinite(value)?3:Math.max(0,Math.min(10,Math.round(value)));
+    input.value=String(limit);input.disabled=!el('practice-auto-retry').checked;
+    el('practice-retry-help').textContent=(limit===0?'Infinite retries until matched.':limit+' extra attempt'+(limit===1?'':'s')+'. After the limit, Auto next card decides whether to advance or wait.');
+    return {enabled:el('practice-auto-retry').checked,limit};
+  }
   function cancelCountIn() {
     countInRun++;clearTimeout(countInTimer);
     el('practice-countin').hidden=true;el('practice-countin-text').textContent='';
@@ -108,10 +116,10 @@
     container.replaceChildren();
     for(const card of state.chords) {
       const supported=D.supported(card);
-      if(!known.has(card.id)) {known.add(card.id);if(supported)chosen.add(card.id);}
+      if(!known.has(card.id)) {known.add(card.id);if(supported && card.practiceSelected!==false)chosen.add(card.id);}
       const label=document.createElement('label');label.className='check-label';
       const check=document.createElement('input');check.type='checkbox';check.checked=chosen.has(card.id);check.disabled=!supported;
-      check.addEventListener('change',()=>{check.checked?chosen.add(card.id):chosen.delete(card.id);buttons();});
+      check.addEventListener('change',()=>{check.checked?chosen.add(card.id):chosen.delete(card.id);card.practiceSelected=check.checked;globalThis.saveBoard?.();buttons();});
       label.append(check,document.createTextNode(card.data.symbol+(supported?'':' (not yet supported)')));container.append(label);
     }
     if(!state.chords.length) container.textContent='Add chords to the board above to build your deck.';
@@ -215,6 +223,8 @@
     el('practice-live-notes').textContent='Waiting for your strum.';
     el('practice-live-detail').textContent='';
     el('practice-progress').textContent='Card '+(index+1)+' of '+deck.length;
+    const retry=retrySettings();
+    el('practice-attempt').textContent=retry.enabled?(retriesUsed?'Retry '+retriesUsed+' of '+(retry.limit===0?'Infinite':retry.limit):'First attempt · '+(retry.limit===0?'Infinite retries':retry.limit+' extra attempts')):'';
     el('practice-cycle').textContent='Pass '+cycle;
     el('practice-chord').textContent=card.data.symbol;
     el('practice-target-tones').textContent='Listening for '+D.pitches(card).map(D.noteName).join(' / ')+'. Play the whole chord.';
@@ -236,7 +246,16 @@
     result(success?'\u2713  Chord matched!':heard&&!wasArmed?'I heard audio, but need a quiet gap first. Mute the strings, then retry.':heard?'Not quite this time. Try again whenever you like.':'I could not hear a clear attempt. Check the input level and try again.');
     el('practice-countdown').textContent=success?'Nice work.':'Time for another try?';
     el('practice-retry').disabled=false;el('practice-next').disabled=false;
-    if(success || el('practice-auto-next').checked)transition=setTimeout(()=>{if(modal.open && !document.hidden)nextCard();},1600);
+    const retry=retrySettings();
+    if(!success && retry.enabled && (retry.limit===0 || retriesUsed<retry.limit)) {
+      el('practice-countdown').textContent='Trying this chord again shortly. Mute the strings, then strum.';
+      transition=setTimeout(()=>{
+        if(!modal.open || document.hidden || !ready())return;
+        const current=retrySettings();
+        if(!current.enabled || (current.limit!==0 && retriesUsed>=current.limit))return;
+        retriesUsed++;beginCard();
+      },1600);
+    } else if(success || el('practice-auto-next').checked)transition=setTimeout(()=>{if(modal.open && !document.hidden)nextCard();},1600);
   }
   function tick(run) {
     if(run!==inputRun || !analyser)return;
@@ -304,6 +323,7 @@
     if(index+1===deck.length && !el('practice-repeat').checked){endSession();return;}
     if(!ready()){pause('Select an audio input before the next card.');return;}
     if(index+1===deck.length){index=0;cycle++;}else index++;
+    retriesUsed=0;
     beginCard();
   }
   function resumeAudio() {
@@ -328,9 +348,11 @@
     deck=state.chords.filter(c=>chosen.has(c.id)&&D.supported(c)).map(c=>({id:c.id,voicing:c.voicing,data:structuredClone(c.data)}));
     if(!deck.length)return;
     if(el('practice-shuffle').checked)for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
-    index=0;cycle=1;pendingStart=true;successes=new Set();attempts=new Set();buttons();beginCard();
+    index=0;cycle=1;retriesUsed=0;pendingStart=true;successes=new Set();attempts=new Set();buttons();beginCard();
   });
   el('practice-retry').addEventListener('click',()=>{if(deck.length)beginCard();});
+  el('practice-auto-retry').addEventListener('change',retrySettings);
+  el('practice-retry-limit').addEventListener('change',retrySettings);
   el('practice-next').addEventListener('click',nextCard);
   el('practice-end').addEventListener('click',endSession);
   el('practice-modal-end').addEventListener('click',endSession);

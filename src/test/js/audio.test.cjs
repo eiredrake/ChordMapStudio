@@ -55,7 +55,7 @@ vm.runInContext(fs.readFileSync(path.join(root, 'app.js'), 'utf8'), context);
   assert.match(element('playback-status').textContent, /Add a chord/);
   const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
   assert.match(html, /playback\.js\?v=practice-1/);
-  assert.match(html, /app\.js\?v=string-notes-1/);
+  assert.match(html, /app\.js\?v=saved-board-1/);
   const instrumentOptions=html.match(/<select id="instrument">([\s\S]*?)<\/select>/)[1];
   for (const [,name] of instrumentOptions.matchAll(/option value="([^"]+)"/g)) {
     const sample = fs.readFileSync(path.join(root, 'soundfonts', name + '-mp3.js'), 'utf8');

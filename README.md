@@ -20,6 +20,11 @@ The server uses only the Java standard library. No Maven, database, account, or 
 
 ## Listening practice (preview)
 
+The chord collection, order, selected voicings, and practice-card selections are
+saved automatically in localStorage in this browser for this site address.
+Reloads and app restarts restore the board, including an intentionally empty board.
+Clearing browser site data removes it; collections do not sync between browsers.
+
 **Tuner**, beside Play All and Stop, opens a tuner using the shared audio input.
 Choose an input on the main screen; listening starts automatically. Follow the highlighted string on the guitar-neck diagram in standard
 E–A–D–G–B–E tuning. Pluck one string at a time with a clean sound. The tuner
@@ -46,6 +51,13 @@ Enable **Auto next card** to advance after a timeout, following a brief result
 message. With this option off, timeouts wait for Retry or Next. Successful
 matches continue to advance automatically. Closing the window cancels any
 pending advance.
+
+Enable **Retry chord after timeout** for automatic extra attempts on the same
+card. The numeric limit accepts 0–10: **0 = Infinite**, retrying until a match;
+1–10 allows that many extra attempts after the first. Each retry gets a full
+card timer and a brief pause to mute the strings. A match advances normally.
+After a finite limit, Auto next card controls whether to advance or wait.
+Closing the modal, ending practice, or losing input cancels pending retries.
 
 **Starting countdown** defaults to 3 seconds: the modal shows READY!, then 3, 2,
 and 1 individually before the first card timer starts. Choose 0–30 seconds; 0
@@ -88,6 +100,7 @@ node src/test/js/practice.test.cjs
 node src/test/js/practice-ui.test.cjs
 node src/test/js/tuner.test.cjs
 node src/test/js/diagram.test.cjs
+node src/test/js/storage.test.cjs
 # Additional real-sample checks (requires ffmpeg on PATH only for this test):
 node src/test/js/practice-samples.test.cjs
 ```

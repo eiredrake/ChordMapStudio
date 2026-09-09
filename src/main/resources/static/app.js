@@ -1,6 +1,26 @@
 const state={chords:[],nextId:1};
 const tuning=['E','A','D','G','B','E'],stringColors=['#ec4a2d','#e3b626','#3465b0','#dd7636','#76a45d','#8a5a9d'],midiOpen=[40,45,50,55,59,64];
 const $=s=>document.querySelector(s);
+const boardStorageKey='chord-map-studio.board.v1';
+function saveBoard(){
+  try{localStorage.setItem(boardStorageKey,JSON.stringify({version:1,cards:state.chords.map(({data,voicing,practiceSelected})=>({data,voicing,practiceSelected}))}));}catch{/* Storage may be disabled or full; the board remains usable. */}
+}
+function restoreBoard(){
+  try{
+    const raw=localStorage.getItem(boardStorageKey);if(raw===null)return false;
+    const saved=JSON.parse(raw);
+    if(saved.version!==1 || !Array.isArray(saved.cards))return false;
+    const valid=saved.cards.every(c=>c && typeof c.data?.symbol==='string' && typeof c.data.name==='string'
+      && Array.isArray(c.data.tones) && c.data.tones.every(t=>typeof t==='string')
+      && Array.isArray(c.data.voicings) && c.data.voicings.length>0
+      && c.data.voicings.every(v=>Array.isArray(v.frets) && v.frets.length===6 && v.frets.every(f=>Number.isInteger(f)&&f>=-1&&f<=36)
+        && Array.isArray(v.fingers) && v.fingers.length===6 && v.fingers.every(f=>Number.isInteger(f)&&f>=0&&f<=5))
+      && Number.isInteger(c.voicing) && c.voicing>=0 && c.voicing<c.data.voicings.length);
+    if(!valid)return false;
+    state.chords=saved.cards.map(c=>({id:state.nextId++,data:c.data,voicing:c.voicing,practiceSelected:c.practiceSelected!==false}));
+    return true;
+  }catch{return false;}
+}
 function escapeXml(value){return String(value).replace(/[<>&\"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','\"':'&quot;',"'":'&apos;'}[c]));}
 
 async function addChord(symbol){
@@ -10,6 +30,7 @@ async function addChord(symbol){
 }
 
 function renderBoard(){
+  saveBoard();
   globalThis.cancelChordDrag?.();
   globalThis.refreshPracticeDeck?.();
   stopPlayback('Four beats per chord · plays in card order.');
@@ -57,4 +78,4 @@ $('#play-composition').addEventListener('click',()=>playCards(state.chords));
 document.addEventListener('click',async e=>{const quick=e.target.closest('[data-chord]');if(quick){$('#chord-input').value=quick.dataset.chord;try{await addChord(quick.dataset.chord)}catch{}}const remove=e.target.closest('[data-remove]');if(remove){state.chords=state.chords.filter(c=>c.id!==Number(remove.dataset.remove));renderBoard();}const voice=e.target.closest('[data-voice]');if(voice){const[id,index]=voice.dataset.voice.split(':').map(Number),card=findCard(id);if(card){card.voicing=index;renderBoard();}}const play=e.target.closest('[data-play]');if(play){const card=findCard(play.dataset.play);if(card)playCard(card);}const down=e.target.closest('[data-download]');if(down){const card=findCard(down.dataset.download);if(card)downloadCard(card);}});
 
 if(document.modelContext?.registerTool)document.modelContext.registerTool({name:'add_guitar_chords',title:'Add guitar chords',description:'Add one or more guitar chord maps to the visible chord board.',inputSchema:{type:'object',properties:{symbols:{type:'array',items:{type:'string'}}},required:['symbols'],additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute:async({symbols})=>{const added=[];for(const symbol of symbols){const chord=await addChord(symbol);added.push(chord.symbol);}return{added,total:state.chords.length};}});
-addChord('C');
+if(restoreBoard())renderBoard();else addChord('C');
