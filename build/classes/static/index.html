@@ -6,11 +6,11 @@
   <meta name="theme-color" content="#17120e">
   <meta name="description" content="Generate, hear, and export clear guitar chord maps for standard tuning.">
   <title>Chord Map Studio</title>
-  <link rel="stylesheet" href="/styles.css?v=reorder-1">
+  <link rel="stylesheet" href="/styles.css?v=string-notes-1">
   <script src="/playback.js?v=practice-1" defer></script>
-  <script src="/app.js?v=reorder-1" defer></script>
-  <script src="/chord-detection.js?v=practice-feedback-2" defer></script>
-  <script src="/practice.js?v=practice-feedback-2" defer></script>
+  <script src="/app.js?v=string-notes-1" defer></script>
+  <script src="/chord-detection.js?v=confirmation-2" defer></script>
+  <script src="/practice.js?v=confirmation-2" defer></script>
   <script src="/reorder.js?v=reorder-1" defer></script>
 </head>
 <body>
@@ -93,6 +93,13 @@
         <fieldset><legend>1. Choose your deck</legend>
           <div id="practice-deck" class="practice-deck"></div>
           <label class="check-label"><input id="practice-shuffle" type="checkbox" checked> Shuffle cards</label>
+          <label class="check-label"><input id="practice-auto-next" type="checkbox"> Auto next card</label>
+          <p class="practice-note">Advance after a timeout. Successful matches always advance automatically.</p>
+          <label class="check-label"><input id="practice-repeat" type="checkbox"> Repeat deck</label>
+          <p class="practice-note">Loop back to the first card. Enable Auto next card too for uninterrupted timed practice.</p>
+          <label for="practice-countin-seconds">Starting countdown (seconds)</label>
+          <input id="practice-countin-seconds" type="number" min="0" max="30" step="1" value="3">
+          <p class="practice-note">READY! followed by this countdown. Set to 0 to start immediately.</p>
           <label for="practice-seconds">Seconds per card</label>
           <input id="practice-seconds" type="number" min="2" max="60" step="1" value="10">
           <label class="check-label"><input id="practice-hint" type="checkbox" checked> Show chord diagram</label>
@@ -110,14 +117,22 @@
         </fieldset>
       </div>
       <div class="practice-buttons"><button id="practice-start" class="icon-button" type="button" disabled>START DECK</button><button id="practice-end" class="icon-button" type="button" disabled>END SESSION</button></div>
-      <div id="practice-stage" class="practice-stage" hidden>
+      <dialog id="practice-modal" aria-labelledby="practice-modal-title" aria-describedby="practice-modal-help">
+      <div class="practice-modal-heading"><h2 id="practice-modal-title" tabindex="-1">Your practice deck</h2><button id="practice-close" class="icon-button" type="button" aria-label="Close practice window">CLOSE</button></div>
+      <p id="practice-modal-help" class="practice-note">Press Space to retry this card. Click outside or press Escape to close and pause.</p>
+      <div id="practice-countin" hidden><p id="practice-countin-text" role="status" aria-live="assertive" aria-atomic="true"></p><p>Pick in hand. Get comfortable.</p></div>
+      <div id="practice-stage" class="practice-stage">
+        <p id="practice-cycle"></p>
         <p id="practice-progress"></p><h3 id="practice-chord"></h3>
         <p id="practice-target-tones"></p>
         <div id="practice-diagram"></div>
         <progress id="practice-time" max="10" value="10" aria-label="Time remaining"></progress><p id="practice-countdown" aria-hidden="true"></p>
         <div id="practice-result" role="status" aria-live="polite"></div>
+        <progress id="practice-confirmation" max="100" value="0" aria-label="Chord confirmation"></progress>
         <div class="practice-buttons"><button id="practice-retry" class="icon-button" type="button" disabled>RETRY CARD</button><button id="practice-next" class="icon-button" type="button" disabled>NEXT CARD</button></div>
+        <button id="practice-modal-end" class="icon-button" type="button">END SESSION</button>
       </div>
+      </dialog>
     </section>
   </main>
   <footer><span>BUILT FOR PLAYERS, NOT PRINTER MANUALS.</span><span>CHORD MAP STUDIO · 2026</span></footer>

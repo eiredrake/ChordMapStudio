@@ -27,6 +27,28 @@ check, set 2–60 seconds per card, and start the deck. Mute the strings briefly
 before each new attempt, then strum. A sustained match earns a green check and
 advances the deck; a timeout offers Retry or Next without a penalty sound.
 
+Practice cards open in a modal window. Click outside it, use Close, or press
+Escape to pause and dismiss it. **Open practice** brings back the same card;
+press **Spacebar** or **Retry card** to restart its timer. Spacebar only retries
+inside the practice window and does not override typing or focused buttons.
+Enable **Auto next card** to advance after a timeout, following a brief result
+message. With this option off, timeouts wait for Retry or Next. Successful
+matches continue to advance automatically. Closing the window cancels any
+pending advance.
+
+**Starting countdown** defaults to 3 seconds: the modal shows READY!, then 3, 2,
+and 1 individually before the first card timer starts. Choose 0–30 seconds; 0
+skips preparation. Closing the modal, hiding the tab, or losing the input cancels
+preparation; retry starts it again. **Repeat deck** loops back to the first card
+without another preparation countdown. Turn on **Auto next card** as well to
+keep moving after timeouts. End session stops the loop; results count attempts
+across passes.
+
+Chord confirmation uses a short rolling window of matching audio evidence,
+allowing brief detection dropouts as a strum decays. The confirmation meter shows
+progress; only a confirmed result displays the green check. Wrong chords, sparse
+accidental matches, and stale samples cannot accumulate indefinitely toward a pass.
+
 Listening requires HTTPS, except on localhost. All analysis happens locally in
 the browser; audio is neither recorded nor uploaded. **Stop listening** releases
 the input. Device changes refresh the list automatically where supported; use

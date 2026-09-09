@@ -64,15 +64,31 @@
     if(missing.length)return 'Not hearing '+missing.map(pc=>names[pc]).join(' / ')+' clearly yet. Try another strum.';
     return 'Hearing other tones too. Try again with a clean sound.';
   }
-  // An uninterrupted hold is required, with a gap cap so a stalled tab cannot pass.
+  // Confirm recent evidence, allowing brief spectral dropouts as strings decay.
+  // Cap credited time per observation; a slow/stalled frame must not award a chord.
   class MatchHold {
-    reset() { this.since=null; this.last=null; }
+    reset() { this.frames=[]; this.last=null; this.progress=0; }
     constructor() { this.reset(); }
     update(match, now) {
-      if(!match) {this.reset();return false;}
-      if(this.last===null || now-this.last>220) this.since=now;
+      if(this.last===null || now-this.last>650 || now<=this.last) {
+        this.reset();this.last=now;return false;
+      }
+      this.frames.push({start:now-Math.min(180,now-this.last),end:now,match});
       this.last=now;
-      return now-this.since>=450;
+      const cutoff=now-900;
+      this.frames=this.frames.filter(frame=>frame.end>cutoff);
+      // Silence before the first matching frame is preparation, not a dropout.
+      while(this.frames.length && !this.frames[0].match)this.frames.shift();
+      let total=0,matched=0,count=0;
+      for(const frame of this.frames) {
+        const duration=frame.end-Math.max(frame.start,cutoff);
+        total+=duration;
+        if(frame.match){matched+=duration;count++;}
+      }
+      const ratio=total?matched/total:0;
+      const confirmed=match && matched>=450 && ratio>=.75 && count>=3;
+      this.progress=confirmed?1:Math.min(.99,matched/450,ratio/.75);
+      return confirmed;
     }
   }
   globalThis.ChordDetection={createDetector,matches,feedback,pitches,supported,MatchHold,noteName:pc=>names[pc]};

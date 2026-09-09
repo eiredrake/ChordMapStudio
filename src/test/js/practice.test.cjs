@@ -28,7 +28,7 @@ function spectrum(notes,rate,{gain=.08,cents=0,rolloff=1.3,noise=0,samples}={}) 
   }
   return Float32Array.from({length:size/2},(_,i)=>20*Math.log10(Math.hypot(re[i],im[i])/size));
 }
-const chords=[['C',[48,52,55,60,64],[0,4,7]],['Am',[45,52,57,60,64],[9,0,4]],['E',[40,47,52,56,59,64],[4,8,11]],['Em',[40,47,52,55,59,64],[4,7,11]],['G',[43,47,50,55,59,67],[7,11,2]],['D',[50,57,62,66],[2,6,9]],['A5',[45,52,57],[9,4]]];
+const chords=[['C',[48,52,55,60,64],[0,4,7]],['Am',[45,52,57,60,64],[9,0,4]],['E',[40,47,52,56,59,64],[4,8,11]],['Em',[40,47,52,55,59,64],[4,7,11]],['G',[43,47,50,55,59,67],[7,11,2]],['D',[50,57,62,66],[2,6,9]],['A',[45,52,57,61,64],[9,1,4]],['A5',[45,52,57],[9,4]]];
 for(const rate of [44100,48000]) {
   const detect=D.createDetector(rate,8192);
   for(const [name,notes,pcs] of chords)for(const options of [{},{gain:.01,rolloff:1.7,cents:8},{gain:.12,rolloff:1.1,cents:-8,noise:.0005}]) {
@@ -50,5 +50,19 @@ for(const now of [0,80,160,240,320,400])assert.equal(hold.update(true,now),false
 assert.equal(hold.update(true,480),true);
 hold.reset();hold.update(true,0);assert.equal(hold.update(true,1000),false,'Stalled tab cannot pass');
 hold.update(false,1080);assert.equal(hold.update(true,1160),false,'Mismatch resets hold');
+hold.reset();let confirmed=false;
+for(let i=0;i<12;i++)confirmed=hold.update(i%5!==3,i*80)||confirmed;
+assert.ok(confirmed,'Brief recurring spectral dropouts must not block a mostly stable chord');
+hold.reset();confirmed=false;
+for(let i=0;i<6;i++)confirmed=hold.update(true,i*280)||confirmed;
+assert.ok(confirmed,'Sampling slower than 220ms can still confirm with enough observations');
+hold.reset();
+for(let i=0;i<40;i++)assert.equal(hold.update(i%2===0,i*80),false,'Alternating wrong/right evidence cannot pass');
+hold.reset();
+for(let i=0;i<40;i++)assert.equal(hold.update(i%6===0,i*80),false,'Isolated matches cannot accumulate indefinitely');
+hold.reset();hold.update(true,0);hold.update(true,80);hold.update(true,160);
+for(let i=3;i<20;i++)hold.update(false,i*80);
+assert.equal(hold.progress,0,'Old evidence expires after wrong audio or silence');
+assert.equal(hold.update(true,1680),false,'One fresh match cannot revive expired evidence');
 console.log('Detection checks passed: varied plucks, wrong chords, missing/extra tones, noise, silence, and sustained-match timing.');
 module.exports={spectrum,chords};

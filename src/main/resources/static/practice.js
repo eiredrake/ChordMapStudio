@@ -1,19 +1,58 @@
 ﻿(() => {
   const el=id=>document.getElementById(id), D=ChordDetection;
   const chosen=new Set(), known=new Set();
+  const modal=el('practice-modal');
   let devices=[], permitted=false, stream, ctx, source, analyser, detector, spectrum, waveform;
   let inputRun=0, busy=false, loop, transition, round, deck=[], index=0, successes=new Set(), attempts=new Set();
   let quietSince=null, armed=false, noise=.002, calibratingUntil=0, quietSamples=[];
   const hold=new D.MatchHold();
+  let countInTimer, countInRun=0, pendingStart=false, cycle=1;
+  function cancelCountIn() {
+    countInRun++;clearTimeout(countInTimer);
+    el('practice-countin').hidden=true;el('practice-countin-text').textContent='';
+    el('practice-stage').hidden=false;
+  }
+  function startCountIn() {
+    cancelCountIn();round=null;hold.reset();
+    const input=el('practice-countin-seconds'),value=Number(input.value);
+    const seconds=input.value.trim()==='' || !Number.isFinite(value)?3:Math.round(Math.max(0,Math.min(30,value)));
+    input.value=String(seconds);
+    if(seconds===0){pendingStart=false;beginCard();return;}
+    const run=countInRun;
+    el('practice-stage').hidden=true;el('practice-countin').hidden=false;
+    function show(remaining) {
+      if(run!==countInRun)return;
+      if(!modal.open || document.hidden || !ready()){pause('Preparation paused. Press Space or Retry card when ready.');return;}
+      if(remaining===0){pendingStart=false;cancelCountIn();beginCard();return;}
+      el('practice-countin-text').textContent=remaining===seconds+1?'READY!':String(remaining);
+      countInTimer=setTimeout(()=>{
+        if(run!==countInRun)return;
+        el('practice-countin-text').textContent='';
+        countInTimer=setTimeout(()=>show(remaining-1),150);
+      },850);
+    }
+    show(seconds+1);
+  }
   const status=text=>{el('listen-status').textContent=text;};
   const result=text=>{if(el('practice-result').textContent!==text)el('practice-result').textContent=text;};
   const rocksmith=device=>/rocksmith|real\s*tone/i.test(device.label);
   function ready() { return !!stream && stream.getAudioTracks().some(t=>t.readyState==='live' && !t.muted) && ctx?.state==='running'; }
   function buttons() {
-    el('practice-start').disabled=busy || !ready() || performance.now()<calibratingUntil || !!deck.length || !state.chords.some(c=>chosen.has(c.id) && D.supported(c));
+    el('practice-start').textContent=deck.length?'OPEN PRACTICE':'START DECK';
+    el('practice-start').disabled=!deck.length && (busy || !ready() || performance.now()<calibratingUntil || !state.chords.some(c=>chosen.has(c.id) && D.supported(c)));
     el('listen-enable').disabled=busy;
     el('listen-disable').disabled=!stream && !busy;
     el('practice-end').disabled=!deck.length;
+    el('practice-modal-end').disabled=!deck.length;
+  }
+  function openPractice() {
+    if(!modal.open)modal.showModal();
+    document.documentElement.classList.add('practice-modal-open');
+    el('practice-modal-title').focus({preventScroll:true});
+  }
+  function closePractice() {
+    pause('Practice paused. Press Space or Retry card when you are ready.');
+    modal.close();
   }
   globalThis.refreshPracticeDeck=()=>{
     const container=el('practice-deck');
@@ -49,9 +88,11 @@
     buttons();
   }
   function pause(message) {
+    cancelCountIn();
     clearTimeout(transition);
     if(!deck.length) return;
     round=null;hold.reset();
+    el('practice-confirmation').value=0;
     el('practice-result').className='';el('practice-result').textContent=message;
     el('practice-retry').disabled=false;el('practice-next').disabled=false;
     el('practice-countdown').textContent='Paused';
@@ -106,15 +147,19 @@
     }
   }
   function beginCard() {
+    cancelCountIn();
     clearTimeout(transition);
     if(!ready()) {status('Enable listening before retrying.');return;}
     if(performance.now()<calibratingUntil) {status('Wait for the brief quiet input check, then retry.');return;}
     stopPlayback('Practice mode: playback stopped.');
+    openPractice();
     const seconds=Math.round(Math.max(2,Math.min(60,Number(el('practice-seconds').value)||10)));el('practice-seconds').value=seconds;
     const card=deck[index];
     round={deadline:performance.now()+seconds*1000,seconds,heard:false};quietSince=null;armed=false;hold.reset();
+    el('practice-confirmation').value=0;
     el('practice-stage').hidden=false;
     el('practice-progress').textContent='Card '+(index+1)+' of '+deck.length;
+    el('practice-cycle').textContent='Pass '+cycle;
     el('practice-chord').textContent=card.data.symbol;
     el('practice-target-tones').textContent='Listening for '+D.pitches(card).map(D.noteName).join(' / ')+'. Play the whole chord.';
     el('practice-diagram').innerHTML=buildSvg(card.data,card.data.voicings[card.voicing]);
@@ -123,16 +168,19 @@
     el('practice-countdown').textContent=seconds.toFixed(1)+' seconds left';
     el('practice-result').className='';el('practice-result').textContent='Mute the strings briefly, then strum.';
     el('practice-retry').disabled=true;el('practice-next').disabled=true;
+    if(pendingStart)startCountIn();
   }
   function finishCard(success) {
     if(!round)return;
-    attempts.add(index);if(success)successes.add(index);
+    el('practice-confirmation').value=success?100:0;
+    const attempt=cycle+':'+index;
+    attempts.add(attempt);if(success)successes.add(attempt);
     const heard=round.heard,wasArmed=armed;round=null;
     el('practice-result').className=success?'practice-success':'';
     result(success?'\u2713  Chord matched!':heard&&!wasArmed?'I heard audio, but need a quiet gap first. Mute the strings, then retry.':heard?'Not quite this time. Try again whenever you like.':'I could not hear a clear attempt. Check the input level and try again.');
     el('practice-countdown').textContent=success?'Nice work.':'Time for another try?';
     el('practice-retry').disabled=false;el('practice-next').disabled=false;
-    if(success)transition=setTimeout(nextCard,1600);
+    if(success || el('practice-auto-next').checked)transition=setTimeout(()=>{if(modal.open && !document.hidden)nextCard();},1600);
   }
   function tick(run) {
     if(run!==inputRun || !analyser)return;
@@ -153,25 +201,29 @@
         const audible=rms>Math.max(.002,noise*3);
         const estimate=audible && !clipped?detector(spectrum):null;
         el('practice-heard').textContent=clipped?'Input is clipping. Lower the input gain.':estimate?.fit>=.72?'Heard pitch classes: '+estimate.notes.join(' / '):audible?'Listening, but the chord is not clear yet.':'Ready. Strum your guitar.';
-        if(round && ready()) {
+        if(round && modal.open && ready()) {
           const remaining=Math.max(0,(round.deadline-now)/1000);
           el('practice-time').value=remaining;el('practice-countdown').textContent=remaining.toFixed(1)+' seconds left';
           if(!audible) {quietSince??=now;if(now-quietSince>=250)armed=true;} else quietSince=null;
           if(audible)round.heard=true;
           const match=armed && !!estimate && D.matches(estimate,D.pitches(deck[index]));
+          const confirmed=hold.update(match,now);
+          el('practice-confirmation').value=Math.round(hold.progress*100);
           if(!armed)result('Waiting for a quiet gap. Mute the strings briefly, then strum.');
           else if(clipped)result('Input is too loud. Lower the amp or input level and try again.');
           else if(!audible)result('Ready for your strum. Play the whole '+deck[index].data.symbol+' chord.');
-          else if(match)result('Chord tones match! Let it ring briefly to confirm...');
+          else if(match)result('Confirming chord... '+Math.round(hold.progress*100)+'%. Keep it ringing.');
           else result(D.feedback(estimate,D.pitches(deck[index])));
           if(now>=round.deadline)finishCard(false);
-          else if(hold.update(match,now))finishCard(true);
+          else if(confirmed)finishCard(true);
         }
       }
     } catch {releaseInput();status('Listening was interrupted. Enable listening to try again.');return;}
     loop=setTimeout(()=>tick(run),80);
   }
   function endSession() {
+    cancelCountIn();pendingStart=false;
+    el('practice-confirmation').value=0;
     clearTimeout(transition);
     round=null;deck=[];hold.reset();buttons();
     el('practice-retry').disabled=true;el('practice-next').disabled=true;
@@ -181,9 +233,10 @@
   function nextCard() {
     clearTimeout(transition);
     if(!deck.length)return;
-    if(index+1===deck.length){endSession();return;}
+    if(index+1===deck.length && !el('practice-repeat').checked){endSession();return;}
     if(!ready()){pause('Enable listening before the next card.');return;}
-    index++;beginCard();
+    if(index+1===deck.length){index=0;cycle++;}else index++;
+    beginCard();
   }
   el('listen-enable').addEventListener('click',enable);
   el('listen-disable').addEventListener('click',()=>{releaseInput();status('Listening off. Audio input released.');});
@@ -192,16 +245,38 @@
   el('practice-device').addEventListener('change',()=>{releaseInput();status('Input changed. Enable listening to use it.');});
   el('practice-hint').addEventListener('change',()=>{el('practice-diagram').hidden=!el('practice-hint').checked;});
   el('practice-start').addEventListener('click',()=>{
-    if(!ready()||deck.length)return;
+    if(deck.length){openPractice();return;}
+    if(!ready())return;
     if(performance.now()<calibratingUntil){status('Keep quiet for the brief input check, then start the deck.');return;}
     deck=state.chords.filter(c=>chosen.has(c.id)&&D.supported(c)).map(c=>({id:c.id,voicing:c.voicing,data:structuredClone(c.data)}));
     if(!deck.length)return;
     if(el('practice-shuffle').checked)for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
-    index=0;successes=new Set();attempts=new Set();buttons();beginCard();
+    index=0;cycle=1;pendingStart=true;successes=new Set();attempts=new Set();buttons();beginCard();
   });
   el('practice-retry').addEventListener('click',()=>{if(deck.length)beginCard();});
   el('practice-next').addEventListener('click',nextCard);
   el('practice-end').addEventListener('click',endSession);
+  el('practice-modal-end').addEventListener('click',endSession);
+  el('practice-close').addEventListener('click',closePractice);
+  modal.addEventListener('cancel',e=>{e.preventDefault();closePractice();});
+  modal.addEventListener('close',()=>{
+    if(modal.open)return;
+    pause('Practice paused. Press Space or Retry card when you are ready.');
+    document.documentElement.classList.remove('practice-modal-open');
+    el('practice-start').focus({preventScroll:true});
+  });
+  const outside=e=>{
+    const rect=modal.getBoundingClientRect();
+    return e.clientX<rect.left || e.clientX>rect.right || e.clientY<rect.top || e.clientY>rect.bottom;
+  };
+  let backdropPress=false;
+  modal.addEventListener('pointerdown',e=>{backdropPress=e.target===modal && outside(e);});
+  modal.addEventListener('click',e=>{if(backdropPress && e.target===modal && outside(e))closePractice();backdropPress=false;});
+  document.addEventListener('keydown',e=>{
+    if(e.code!=='Space' || e.repeat || e.isComposing || e.altKey || e.ctrlKey || e.metaKey || !modal.open || !deck.length)return;
+    if(e.target.closest('input, textarea, select, button, [contenteditable]:not([contenteditable="false"])'))return;
+    e.preventDefault();beginCard();
+  });
   document.addEventListener('visibilitychange',()=>{if(document.hidden)pause('Paused while this tab was away. Retry when you are ready.');else void refreshDevices();});
   window.addEventListener('pagehide',releaseInput);
   navigator.mediaDevices?.addEventListener('devicechange',refreshDevices);

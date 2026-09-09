@@ -37,4 +37,12 @@ for(const [name,notes,pcs] of chords){
 }
 assert.equal(ChordDetection.matches(estimateNotes([48,55,60]),[0,4,7]),false,'Sampled C without third must not pass');
 assert.equal(ChordDetection.matches(estimateNotes([48,52,55,61]),[0,4,7]),false,'Sampled C with wrong extra note must not pass');
+for(const [name,notes,pcs] of chords.filter(c=>['E','A','D'].includes(c[0]))) {
+  const hold=new ChordDetection.MatchHold();let confirmed=false;
+  for(let frame=0;frame<20;frame++) {
+    const estimate=estimateNotes(notes,.15+frame*.08);
+    if(hold.update(ChordDetection.matches(estimate,pcs),frame*80)){confirmed=true;break;}
+  }
+  assert.ok(confirmed,name+' sampled strum reaches confirmed success across successive audio frames');
+}
 console.log('Bundled steel-guitar sample checks passed for '+chords.length+' chords at three points in a strum.');
