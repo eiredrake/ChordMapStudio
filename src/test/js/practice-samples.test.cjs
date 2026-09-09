@@ -46,3 +46,11 @@ for(const [name,notes,pcs] of chords.filter(c=>['E','A','D'].includes(c[0]))) {
   assert.ok(confirmed,name+' sampled strum reaches confirmed success across successive audio frames');
 }
 console.log('Bundled steel-guitar sample checks passed for '+chords.length+' chords at three points in a strum.');
+require('../../main/resources/static/tuner.js');
+for(const midi of [40,45,50,55,59,64])for(const time of [.2,.5,.8]) {
+  const audio=sample(midi).slice(Math.floor(time*rate),Math.floor(time*rate)+8192);
+  const pitch=GuitarTuner.pitch(audio,rate),target=440*2**((midi-69)/12);
+  assert.ok(pitch,'Tuner detects sampled open string '+midi);
+  assert.ok(Math.abs(1200*Math.log2(pitch.frequency/target))<8,'Sampled open string measured near correct pitch: '+midi);
+}
+console.log('Tuner detects all six sampled open strings at three points in their decay.');

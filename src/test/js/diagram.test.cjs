@@ -10,7 +10,7 @@ const context = vm.createContext({
 vm.runInContext(fs.readFileSync(path.join(__dirname, '../../main/resources/static/app.js'), 'utf8'), context);
 
 function verify(frets, fingers, expectedLabels) {
-  const svg = context.buildSvg({ symbol: 'Bsus4' }, { frets, fingers });
+  const svg = context.buildSvg({ symbol: 'Bsus4', tones: ['B','E','F#'] }, { frets, fingers });
   const dots = [...svg.matchAll(/<circle cx="([\d.]+)" cy="([\d.]+)" r="16"/g)];
   assert.equal(dots.length, frets.filter(f => f > 0).length, 'Every fretted note must be visible');
   for (let string = 0; string < frets.length; string++) {

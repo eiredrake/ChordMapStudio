@@ -135,3 +135,32 @@ button:disabled { opacity:.45; cursor:default; }
 #practice-countin { min-height:340px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
 #practice-countin-text { font:700 clamp(64px,16vw,112px) Georgia,serif; color:var(--orange); height:1.3em; line-height:1.3; margin:20px 0; }
 #practice-countin > p:last-child,#practice-cycle { font-size:13px; color:var(--muted); }
+
+#tuner-modal { width:min(620px,calc(100vw - 28px)); max-height:calc(100dvh - 32px); overflow-y:auto; overscroll-behavior:contain; padding:24px; color:var(--ink); background:#f8f5ee; border:1px solid var(--line); box-shadow:0 20px 80px #0005; }
+#tuner-modal::backdrop { background:#17120eaa; }
+#tuner-modal p { line-height:1.5; }
+#tuner-modal label { display:block; margin:18px 0 8px; }
+#tuner-modal select { width:100%; padding:10px; margin-bottom:16px; background:var(--paper); color:var(--ink); border:1px solid var(--line); }
+#tuner-modal :focus-visible { outline:3px solid var(--orange); outline-offset:3px; }
+#tuner-target,#tuner-note,#tuner-direction,#tuner-measured { text-align:center; }
+#tuner-note { font:64px Georgia,serif; margin:16px 0; }
+#tuner-direction { font-size:22px; font-weight:700; min-height:66px; }
+.tuner-in-tune { color:#24613b; }
+#tuner-cents { display:block; width:100%; height:24px; }
+.tuner-scale { display:flex; justify-content:space-between; gap:12px; font-size:12px; }
+.heard-panel { margin:12px 0 20px; padding:14px; text-align:left; border:1px solid var(--line); background:#f8f5ee; font-size:13px; overflow-wrap:anywhere; }
+.heard-panel p { margin:6px 0; }
+#practice-live-notes { font-size:16px; font-weight:700; }
+@media(max-width:520px) { #tuner-modal { padding:16px; } }
+#tuner-neck { max-width:300px; margin:auto; }
+#tuner-neck svg { display:block; width:100%; }
+#tuner-neck text { text-anchor:middle; fill:currentColor; font:700 18px Arial,sans-serif; }
+#tuner-neck line { stroke:currentColor; }
+#tuner-neck .tuner-string-number { font-size:12px; }
+.tuner-string-active { color:var(--orange); }
+.tuner-string-done { color:#24613b; }
+.tuner-string-idle { color:var(--muted); }
+.tuner-highlight { fill:#fce0cf; }
+.tuner-frets { fill:none; stroke:var(--line); stroke-width:2; }
+.tuner-nut { fill:none; stroke:var(--ink); stroke-width:6; }
+#tuner-progress { text-align:center; }

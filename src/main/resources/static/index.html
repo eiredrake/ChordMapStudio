@@ -6,11 +6,12 @@
   <meta name="theme-color" content="#17120e">
   <meta name="description" content="Generate, hear, and export clear guitar chord maps for standard tuning.">
   <title>Chord Map Studio</title>
-  <link rel="stylesheet" href="/styles.css?v=string-notes-1">
+  <link rel="stylesheet" href="/styles.css?v=tuner-auto-2">
   <script src="/playback.js?v=practice-1" defer></script>
   <script src="/app.js?v=string-notes-1" defer></script>
   <script src="/chord-detection.js?v=confirmation-2" defer></script>
-  <script src="/practice.js?v=confirmation-2" defer></script>
+  <script src="/tuner.js?v=tuner-auto-2" defer></script>
+  <script src="/practice.js?v=tuner-auto-2" defer></script>
   <script src="/reorder.js?v=reorder-1" defer></script>
 </head>
 <body>
@@ -78,6 +79,7 @@
         <div><label for="tempo">TEMPO · BPM</label><input id="tempo" type="number" min="40" max="240" value="100" step="1"></div>
         <button id="play-composition" class="icon-button" type="button" disabled>▶ PLAY ALL</button>
         <button id="stop-playback" class="icon-button" type="button" disabled>■ STOP</button>
+        <button id="tuner-open" class="icon-button" type="button">TUNER</button>
         <p id="playback-status" role="status">Four beats per chord · plays in card order.</p>
       </div>
       <p id="reorder-help" class="reorder-help">Drag a card by its grip to change the order. With the grip focused, use arrow keys to move it.</p>
@@ -108,12 +110,12 @@
           <label for="practice-source">Input type</label>
           <select id="practice-source"><option value="mic">Microphone / other audio input</option><option value="usb">Rocksmith USB cable</option></select>
           <label for="practice-device">Audio input</label>
-          <select id="practice-device"><option value="">Enable listening to choose a device</option></select>
+          <select id="practice-device"><option value="">Looking for audio inputs?</option></select>
           <p id="practice-usb" class="practice-note">Cable status is available after audio permission.</p>
-          <div class="practice-buttons"><button id="listen-enable" class="icon-button" type="button">ENABLE LISTENING</button><button id="listen-disable" class="icon-button" type="button" disabled>STOP LISTENING</button><button id="listen-refresh" class="icon-button" type="button">REFRESH INPUTS</button></div>
+          <div class="practice-buttons"><button id="listen-refresh" class="icon-button" type="button">REFRESH INPUTS</button></div>
           <label for="practice-level">Input level</label><meter id="practice-level" min="0" max="1" value="0">Input level</meter>
           <p id="listen-status" role="status">Audio stays in your browser. Nothing is recorded or uploaded.</p>
-          <p id="practice-heard" class="practice-note">Enable listening, then strum to check the input.</p>
+          <p id="practice-heard" class="practice-note">Listening starts automatically. Allow audio access, then strum to check the input.</p>
         </fieldset>
       </div>
       <div class="practice-buttons"><button id="practice-start" class="icon-button" type="button" disabled>START DECK</button><button id="practice-end" class="icon-button" type="button" disabled>END SESSION</button></div>
@@ -128,12 +130,24 @@
         <div id="practice-diagram"></div>
         <progress id="practice-time" max="10" value="10" aria-label="Time remaining"></progress><p id="practice-countdown" aria-hidden="true"></p>
         <div id="practice-result" role="status" aria-live="polite"></div>
+        <div class="heard-panel"><strong>Live input</strong><p id="practice-live-input"></p><p id="practice-live-notes"></p><p id="practice-live-detail"></p></div>
         <progress id="practice-confirmation" max="100" value="0" aria-label="Chord confirmation"></progress>
         <div class="practice-buttons"><button id="practice-retry" class="icon-button" type="button" disabled>RETRY CARD</button><button id="practice-next" class="icon-button" type="button" disabled>NEXT CARD</button></div>
         <button id="practice-modal-end" class="icon-button" type="button">END SESSION</button>
       </div>
       </dialog>
     </section>
+      <dialog id="tuner-modal" aria-labelledby="tuner-title">
+        <div class="practice-modal-heading"><h2 id="tuner-title" tabindex="-1">Guitar tuner</h2><button id="tuner-close" class="icon-button" type="button">CLOSE</button></div>
+        <p>Standard tuning · A = 440 Hz. Pluck the highlighted open string and mute the others. The tuner advances automatically. Use a clean sound.</p>
+        <p id="tuner-status" role="status">Listening uses the input selected on the main screen. Audio stays in your browser.</p>
+<div id="tuner-neck"></div><p id="tuner-progress" role="status"></p><button id="tuner-restart" class="icon-button" type="button">RESTART TUNING</button>
+        <p id="tuner-target"></p><p id="tuner-note">—</p><p id="tuner-direction" role="status">Pluck the selected string.</p>
+        <meter id="tuner-cents" min="-50" max="50" value="0" aria-label="Cents from target pitch"></meter>
+        <div class="tuner-scale"><span>Flat · tune up</span><span>In tune</span><span>Sharp · tune down</span></div>
+        <p id="tuner-measured"></p>
+        <p class="practice-note">One string at a time; a full chord cannot be tuned here. Closing the tuner keeps listening enabled. Change audio inputs on the main screen.</p>
+      </dialog>
   </main>
   <footer><span>BUILT FOR PLAYERS, NOT PRINTER MANUALS.</span><span>CHORD MAP STUDIO · 2026</span></footer>
 </body>
