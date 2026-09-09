@@ -4,6 +4,13 @@ A dependency-free, self-hosted Java 21 web application for generating guitar cho
 
 ## Run
 
+For **v1.0.0**, download the Windows ZIP from
+[GitHub Releases](https://github.com/eiredrake/ChordMapStudio/releases/tag/v1.0.0),
+extract it, and double-click **start.bat**. Install a **Java 21+ JDK** first.
+The launcher builds the app and opens your default browser once it is ready.
+See [RELEASE.md](RELEASE.md) for full instructions, the prebuilt JAR option,
+custom ports, and building release assets.
+
 On Windows PowerShell:
 
 ```powershell
