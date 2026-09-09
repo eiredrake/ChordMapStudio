@@ -64,10 +64,10 @@ function advance(ms){const end=now+ms;while(true){const next=[...timers].filter(
   advance(940);
   assert.match(el('practice-result').textContent,/Not quite/);
   advance(2000);assert.equal(el('practice-progress').textContent,'Card 2 of 2','Auto-next off leaves timeout on its card');
-  await el('practice-close').fire('click');assert.equal(el('practice-modal').open,false);
-  advance(3000);assert.match(el('practice-countdown').textContent,/Paused/);
+  await el('practice-modal').fire('cancel',{preventDefault(){}});assert.equal(el('practice-modal').open,false);
+  advance(3000);assert.equal(el('practice-end').disabled,true);assert.equal(el('practice-start').textContent,'START DECK');
   await el('practice-start').fire('click');assert.equal(el('practice-modal').open,true);
-  assert.equal(el('practice-progress').textContent,'Card 2 of 2','Reopening preserves position');
+  assert.equal(el('practice-progress').textContent,'Card 1 of 2','Starting after dismissal creates a new session');
   let prevented=false;
   const space={code:'Space',target:{closest:()=>null},preventDefault(){prevented=true;}};
   await document.fire('keydown',space);assert.ok(prevented);assert.equal(el('practice-countdown').textContent,'2.0 seconds left');
@@ -79,7 +79,7 @@ function advance(ms){const end=now+ms;while(true){const next=[...timers].filter(
   await el('practice-start').fire('click');
   const backdrop={target:el('practice-modal'),clientX:10,clientY:10};
   await el('practice-modal').fire('pointerdown',backdrop);await el('practice-modal').fire('click',backdrop);
-  assert.equal(el('practice-modal').open,false,'Click away closes');
+  assert.equal(el('practice-modal').open,false,'Click away closes');assert.equal(el('practice-end').disabled,true,'Click away ends session');
   await el('practice-start').fire('click');
   await el('practice-retry').fire('click');
   context.pausePracticeForPlayback();advance(3000);assert.match(el('practice-result').textContent,/Paused for playback/);
@@ -94,9 +94,9 @@ function advance(ms){const end=now+ms;while(true){const next=[...timers].filter(
   await el('practice-start').fire('click');advance(2100);
   await document.fire('keydown',space);advance(1700);assert.equal(el('practice-progress').textContent,'Card 1 of 2');
   advance(2100);assert.equal(el('practice-progress').textContent,'Card 2 of 2');
-  advance(2100);await el('practice-close').fire('click');advance(2000);
-  assert.equal(el('practice-end').disabled,false,'Dismiss cancels pending auto-next and completion');
-  await el('practice-start').fire('click');await document.fire('keydown',space);advance(3800);
+  advance(2100);await el('practice-modal').fire('cancel',{preventDefault(){}});advance(2000);
+  assert.equal(el('practice-end').disabled,true,'Dismiss ends the session and cancels pending auto-next');
+  await el('practice-start').fire('click');await document.fire('keydown',space);advance(7400);
   assert.equal(el('practice-end').disabled,true,'Final timeout completes deck');
   // Count-in opens immediately but neither scores nor consumes card time.
   el('practice-countin-seconds').value='3';el('practice-repeat').checked=true;
@@ -115,9 +115,9 @@ function advance(ms){const end=now+ms;while(true){const next=[...timers].filter(
   assert.equal(el('practice-countin').hidden,true,'Repeat does not replay initial preparation');
   await el('practice-end').fire('click');
   await el('practice-start').fire('click');advance(1000);
-  await el('practice-close').fire('click');advance(5000);
+  await el('practice-modal').fire('cancel',{preventDefault(){}});advance(5000);
   assert.equal(el('practice-modal').open,false);assert.equal(el('practice-countin').hidden,true);
-  assert.equal(el('practice-countdown').textContent,'Paused','Closing cancels preparation');
+  assert.equal(el('practice-end').disabled,true,'Closing cancels preparation and ends session');
   await el('practice-start').fire('click');await document.fire('keydown',space);
   assert.equal(el('practice-countin-text').textContent,'READY!','Retry restarts cancelled preparation');
   document.hidden=true;await document.fire('visibilitychange');advance(5000);
@@ -142,8 +142,8 @@ function advance(ms){const end=now+ms;while(true){const next=[...timers].filter(
   assert.match(el('practice-attempt').textContent,/Retry 12 of Infinite/);
   audible=true;match=true;advance(720);assert.match(el('practice-result').textContent,/Chord matched/);
   advance(1600);assert.equal(el('practice-progress').textContent,'Card 2 of 2','Success ends infinite retry');
-  audible=false;match=false;advance(2200);await el('practice-close').fire('click');advance(4000);
-  assert.equal(el('practice-countdown').textContent,'Paused','Closing cancels a scheduled retry');
+  audible=false;match=false;advance(2200);await el('practice-modal').fire('cancel',{preventDefault(){}});advance(4000);
+  assert.equal(el('practice-end').disabled,true,'Closing cancels a scheduled retry and ends session');
   await el('practice-end').fire('click');
   el('practice-auto-next').checked=false;el('practice-retry-limit').value='1';
   await el('practice-start').fire('click');advance(7600);

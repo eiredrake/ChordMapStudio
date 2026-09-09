@@ -43,8 +43,8 @@ check, set 2–60 seconds per card, and start the deck. Mute the strings briefly
 before each new attempt, then strum. A sustained match earns a green check and
 advances the deck; a timeout offers Retry or Next without a penalty sound.
 
-Practice cards open in a modal window. Click outside it, use Close, or press
-Escape to pause and dismiss it. **Open practice** brings back the same card;
+Practice cards open in a modal window. Click outside it or press
+Escape to end the session and close it. **Start deck** begins a new session;
 press **Spacebar** or **Retry card** to restart its timer. Spacebar only retries
 inside the practice window and does not override typing or focused buttons.
 Enable **Auto next card** to advance after a timeout, following a brief result

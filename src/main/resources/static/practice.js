@@ -99,7 +99,6 @@
     el('practice-start').textContent=deck.length?'OPEN PRACTICE':'START DECK';
     el('practice-start').disabled=!deck.length && (busy || !ready() || performance.now()<calibratingUntil || !state.chords.some(c=>chosen.has(c.id) && D.supported(c)));
     el('practice-end').disabled=!deck.length;
-    el('practice-modal-end').disabled=!deck.length;
   }
   function openPractice() {
     if(tunerModal.open)tunerModal.close();
@@ -108,7 +107,7 @@
     el('practice-modal-title').focus({preventScroll:true});
   }
   function closePractice() {
-    pause('Practice paused. Press Space or Retry card when you are ready.');
+    endSession();
     modal.close();
   }
   globalThis.refreshPracticeDeck=()=>{
@@ -355,12 +354,10 @@
   el('practice-retry-limit').addEventListener('change',retrySettings);
   el('practice-next').addEventListener('click',nextCard);
   el('practice-end').addEventListener('click',endSession);
-  el('practice-modal-end').addEventListener('click',endSession);
-  el('practice-close').addEventListener('click',closePractice);
   modal.addEventListener('cancel',e=>{e.preventDefault();closePractice();});
   modal.addEventListener('close',()=>{
     if(modal.open)return;
-    pause('Practice paused. Press Space or Retry card when you are ready.');
+    if(deck.length)endSession();
     if(!tunerModal.open){document.documentElement.classList.remove('practice-modal-open');el('practice-start').focus({preventScroll:true});}
   });
   const outside=e=>{
