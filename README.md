@@ -25,6 +25,14 @@ Major, minor, power chords, 6ths, 7ths, 9ths, added 9ths, suspended, diminished,
 
 The server uses only the Java standard library. No Maven, database, account, or internet connection is required.
 
+## Guitar scales
+
+Use **Guitar scales** to select any root, including sharps and flats, and explore
+minor/major pentatonic, major, natural minor, harmonic minor, or minor blues scales.
+It starts with **A minor pentatonic** (A, C, D, E, G) at frets 5–10. Choose a fret
+range or the full neck view; orange circles identify roots. Note names and interval
+formulas appear above the diagram. **Download SVG** exports the selected map.
+
 ## Listening practice (preview)
 
 The chord collection, order, selected voicings, and practice-card selections are

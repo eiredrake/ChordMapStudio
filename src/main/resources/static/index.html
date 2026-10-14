@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="/styles.css?v=tuner-auto-2">
   <script src="/playback.js?v=practice-1" defer></script>
   <script src="/app.js?v=saved-board-1" defer></script>
+  <script src="/scales.js?v=scales-1" defer></script>
   <script src="/chord-detection.js?v=confirmation-2" defer></script>
   <script src="/tuner.js?v=tuner-auto-2" defer></script>
   <script src="/practice.js?v=dismiss-end-1" defer></script>
@@ -86,6 +87,19 @@
       <p id="reorder-help" class="reorder-help">Drag a card by its grip to change the order. With the grip focused, use arrow keys to move it.</p>
       <p id="reorder-status" class="sr-only" role="status"></p>
       <div id="chord-board" class="chord-board"></div>
+    </section>
+    <section class="scale-section" aria-labelledby="scale-title">
+      <span class="section-label">EXPLORE THE FRETBOARD</span>
+      <h2 id="scale-title">Guitar scales</h2>
+      <div class="scale-controls">
+        <div><label for="scale-root">ROOT NOTE</label><select id="scale-root"></select></div>
+        <div><label for="scale-type">SCALE</label><select id="scale-type"></select></div>
+        <div><label for="scale-position">FRET RANGE</label><select id="scale-position"><option value="0">Open position · 0–5</option><option value="5" selected>Frets 5–10</option><option value="10">Frets 10–15</option><option value="15">Frets 15–20</option><option value="0:15">Full neck · 0–15</option></select></div>
+        <button id="scale-download" type="button" class="icon-button">DOWNLOAD SVG</button>
+      </div>
+      <p id="scale-notes" role="status" aria-live="polite"></p>
+      <p class="practice-note">Orange circles mark the root. Read each string from left to right; numbers above the neck are frets. These are all scale notes in the selected range.</p>
+      <div id="scale-diagram" class="scale-diagram"></div>
     </section>
     <section class="practice-section" aria-labelledby="practice-title">
       <span class="section-label">A LITTLE EVERY DAY</span>
