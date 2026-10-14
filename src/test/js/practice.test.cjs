@@ -1,6 +1,11 @@
 ﻿const assert=require('node:assert/strict');
 require('../../main/resources/static/chord-detection.js');
 const D=globalThis.ChordDetection;
+for(const symbol of ['Bsus4','Bsus2','Bsus','F#sus4','Bbsus2'])
+  assert.ok(D.supported({data:{symbol}}),symbol+' is available in practice');
+for(const symbol of ['Bsus3','B7','Bsus4/F#'])
+  assert.equal(D.supported({data:{symbol}}),false,symbol+' remains excluded');
+assert.deepEqual(D.pitches({data:{voicings:[{frets:[-1,2,4,4,5,2]}]},voicing:0}),[11,6,4]);
 // Generate time-domain plucks and take an independent radix-2 FFT, as the browser
 // does. Test signals vary harmonic rolloff, tuning, gain, and sample rate.
 function spectrum(notes,rate,{gain=.08,cents=0,rolloff=1.3,noise=0,samples}={}) {
@@ -29,6 +34,7 @@ function spectrum(notes,rate,{gain=.08,cents=0,rolloff=1.3,noise=0,samples}={}) 
   return Float32Array.from({length:size/2},(_,i)=>20*Math.log10(Math.hypot(re[i],im[i])/size));
 }
 const chords=[['C',[48,52,55,60,64],[0,4,7]],['Am',[45,52,57,60,64],[9,0,4]],['E',[40,47,52,56,59,64],[4,8,11]],['Em',[40,47,52,55,59,64],[4,7,11]],['G',[43,47,50,55,59,67],[7,11,2]],['D',[50,57,62,66],[2,6,9]],['A',[45,52,57,61,64],[9,1,4]],['A5',[45,52,57],[9,4]]];
+chords.push(['Bsus4',[47,54,59,64,66],[11,4,6]],['Bsus2',[47,54,59,61,66],[11,1,6]],['B',[47,54,59,63,66],[11,3,6]]);
 for(const rate of [44100,48000]) {
   const detect=D.createDetector(rate,8192);
   for(const [name,notes,pcs] of chords)for(const options of [{},{gain:.01,rolloff:1.7,cents:8},{gain:.12,rolloff:1.1,cents:-8,noise:.0005}]) {

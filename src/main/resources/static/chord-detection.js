@@ -4,7 +4,7 @@
 (() => {
   const names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
   const open = [40,45,50,55,59,64];
-  const supported = card => /^[A-G][#b]?(?:maj|min|m|5)?$/.test(card.data.symbol);
+  const supported = card => /^[A-G][#b]?(?:maj|min|m|5|sus[24]?)?$/.test(card.data.symbol);
   const pitches = card => [...new Set(card.data.voicings[card.voicing].frets.flatMap((f,s) => f < 0 ? [] : [(open[s]+f)%12]))];
   const sinc = x => Math.abs(x) < 1e-9 ? 1 : Math.sin(Math.PI*x)/(Math.PI*x);
   const windowPeak = x => Math.abs(.42*sinc(x)+.25*(sinc(x-1)+sinc(x+1))+.04*(sinc(x-2)+sinc(x+2)));

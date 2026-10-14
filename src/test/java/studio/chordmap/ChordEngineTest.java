@@ -8,7 +8,7 @@ import java.util.HashSet;
 public final class ChordEngineTest {
     public static void main(String[] args) {
         int[] tuning = {40, 45, 50, 55, 59, 64};
-        for (String symbol : List.of("Bsus4", "BSus4", "BSUS4", "bSuS4", " B sus4 ")) {
+        for (String symbol : List.of("Bsus4", "bsus4", "BSus4", "BSUS4", "bSuS4", " B sus4 ")) {
             var chord = ChordEngine.parse(symbol);
             check(chord.symbol().equals("Bsus4"), "Normalized symbol: " + symbol);
             check(chord.tones().equals(List.of("B", "E", "F#")), "Bsus4 tones");

@@ -21,7 +21,7 @@ Then open [http://localhost:8080](http://localhost:8080). Set the `PORT` environ
 
 ## Supported chord symbols
 
-Major, minor, power chords, 6ths, 7ths, 9ths, added 9ths, suspended, diminished, augmented, and slash chords. Examples: `C`, `Am`, `C#5`, `F#m7`, `Bbmaj7`, `D/F#`, `Asus4`.
+Major, minor, power chords, 6ths, 7ths, 9ths, added 9ths, suspended, diminished, augmented, and slash chords. Examples: `C`, `Am`, `C#5`, `F#m7`, `Bbmaj7`, `D/F#`, `Bsus4`, `Asus2`. Suspended chords accept `sus2`, `sus4`, or `sus` (an alias for `sus4`), including lowercase input such as `bsus4`.
 
 The server uses only the Java standard library. No Maven, database, account, or internet connection is required.
 
@@ -86,7 +86,7 @@ the input. Device changes refresh the list automatically where supported; use
 A generic USB interface can be selected under **Microphone / other audio input**.
 Detected means the browser can see the adapter, not that the guitar is connected.
 
-The preview supports major, minor, and power chords in standard tuning at A=440.
+The preview supports major, minor, power, and suspended chords (`sus2`, `sus4`, and `sus`) in standard tuning at A=440.
 Use a clean signal and a quiet room for microphone practice. It checks chord
 identity, not exact fingering or whether every string rings. Extended and slash
 chords remain available on the board but are excluded from listening decks.
